@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Diccionario Digital Interactivo de la Mano — Aprende las partes de la mano y las texturas.">
+  <title>Mi diccionario de la mano</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ctext%20y='26'%20font-size='28'%3E✋%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+<main class="app">
+
+  <!-- ====== Encabezado ====== -->
+  <header>
+    <span class="brand">MI PEQUEÑO MUNDO · LA MANO</span>
+    <button id="sound" class="sound" aria-label="Desactivar sonido" aria-pressed="true">🔊</button>
+  </header>
+
+  <!-- ====== Tarjeta principal ====== -->
+  <section class="card">
+    <div class="layout">
+
+      <!-- ---- Escenario ---- -->
+      <div id="stage" class="stage">
+
+        <!--
+          Imagen de la escena actual.
+          En lección: se reemplaza por la imagen específica de cada parte.
+          En juego:   se usa la imagen completa con todas las zonas.
+          data-clip se usa para recortar palma desde mano.png.
+        -->
+        <img id="sceneImg" class="scene-img" src="./assets/images/mano.jpg"
+             alt="Escena de la mano" draggable="false">
+
+        <!-- Video de la LECCIÓN (se reproduce por tramos y se pausa al final de cada parte) -->
+        <video id="sceneVideo" class="scene-img" src="./assets/video/manooos.mp4"
+               muted playsinline preload="auto" disablepictureinpicture
+               aria-label="Video de la mano" hidden></video>
+
+        <!--
+          SVG superpuesto SOLO durante el juego.
+          En lección la imagen ya ES la zona → no se necesitan recuadros.
+          En juego aparece la imagen completa con 5 zonas tocables.
+        -->
+        <svg id="lessonSvg" class="scene-svg" viewBox="0 0 864 496" preserveAspectRatio="xMidYMid meet"
+             aria-hidden="true" hidden>
+          <path id="lessonShape" class="lesson-shape" d=""/>
+        </svg>
+
+        <svg id="sceneSvg" class="scene-svg" viewBox="0 0 1024 1000" preserveAspectRatio="xMidYMid meet"
+             aria-label="Partes de la mano; toca cada zona" role="group" hidden>
+
+          <!-- MANO (contorno completo: muñeca + palma + dedos). Va primero = queda debajo -->
+          <g class="zone" data-zone="mano" role="button" tabindex="-1" aria-label="MANO">
+            <path class="hit"       d="M480 590 L550 548 L650 550 L700 562 L765 592 L787 625 L770 642 L730 642 L705 660 L765 712 L822 790 L822 808 L795 842 L750 882 L715 874 L690 852 L648 858 L615 848 L580 805 L548 748 L515 715 L480 640 Z"/>
+            <path class="halo-rect" d="M480 590 L550 548 L650 550 L700 562 L765 592 L787 625 L770 642 L730 642 L705 660 L765 712 L822 790 L822 808 L795 842 L750 882 L715 874 L690 852 L648 858 L615 848 L580 805 L548 748 L515 715 L480 640 Z"/>
+          </g>
+
+          <!-- PALMA (centro de la mano, sin dedos ni pulgar) -->
+          <g class="zone" data-zone="palma" role="button" tabindex="-1" aria-label="PALMA">
+            <path class="hit"       d="M486 610 L548 552 L650 552 L690 580 L695 640 L700 662 L548 748 L515 715 L490 650 Z"/>
+            <path class="halo-rect" d="M486 610 L548 552 L650 552 L690 580 L695 640 L700 662 L548 748 L515 715 L490 650 Z"/>
+          </g>
+
+          <!-- DEDOS (4 dedos + pulgar) -->
+          <g class="zone" data-zone="dedos" role="button" tabindex="-1" aria-label="DEDOS">
+            <path class="hit"       d="M548 748 L700 662 L765 712 L822 790 L822 808 L795 842 L750 882 L715 874 L690 852 L648 858 L615 848 L580 805 Z M690 562 L765 592 L787 625 L770 642 L730 642 L695 640 Z"/>
+            <path class="halo-rect" d="M548 748 L700 662 L765 712 L822 790 L822 808 L795 842 L750 882 L715 874 L690 852 L648 858 L615 848 L580 805 Z M690 562 L765 592 L787 625 L770 642 L730 642 L695 640 Z"/>
+          </g>
+
+          <!-- SUAVE (peluche) -->
+          <g class="zone" data-zone="suave" role="button" tabindex="-1" aria-label="SUAVE">
+            <path class="hit"       d="M508 255 L560 160 L700 125 L745 150 L830 130 L910 112 L985 110 L1024 260 L1024 430 L985 520 L920 545 L850 592 L740 592 L700 565 L690 500 L500 500 L485 430 Z"/>
+            <path class="halo-rect" d="M508 255 L560 160 L700 125 L745 150 L830 130 L910 112 L985 110 L1024 260 L1024 430 L985 520 L920 545 L850 592 L740 592 L700 565 L690 500 L500 500 L485 430 Z"/>
+          </g>
+
+          <!-- ÁSPERO (lija) -->
+          <g class="zone" data-zone="aspero" role="button" tabindex="-1" aria-label="ÁSPERO">
+            <path class="hit"       d="M103 690 L272 598 L477 868 L268 963 Z"/>
+            <path class="halo-rect" d="M103 690 L272 598 L477 868 L268 963 Z"/>
+          </g>
+
+        </svg>
+
+        <!-- Celebración -->
+        <div id="celebration" class="celebration" hidden><span>★ ✦ ★</span></div>
+      </div>
+
+      <!-- ---- Panel de contenido textual ---- -->
+      <div class="copy">
+
+        <!-- Bienvenida -->
+        <div id="welcome">
+          <span class="badge">MIRAMOS · ESCUCHAMOS · JUGAMOS</span>
+          <h1>MI DICCIONARIO<br>DE LA MANO</h1>
+          <p>Descubrimos las partes de nuestra mano y las texturas</p>
+          <div class="actions">
+            <button id="start" class="primary">EMPEZAR ▶</button>
+          </div>
+        </div>
+
+        <!-- Lección -->
+        <div id="lesson" hidden>
+          <span class="eyebrow">CONOZCO MI MANO</span>
+          <h2 id="word">MI MANO</h2>
+          <p id="phrase"></p>
+          <div id="lessonIcon" class="lesson-icon" hidden></div>
+          <p class="hint">👆 TOCA Y ESCUCHA</p>
+          <div id="dots" class="progress" aria-hidden="true"></div>
+          <span id="count" class="badge"></span>
+        </div>
+
+        <!-- Juego -->
+        <div id="game" hidden>
+          <span class="eyebrow">JUGAMOS JUNTOS</span>
+          <h2>¿DÓNDE ESTÁ?</h2>
+          <p id="question"></p>
+          <p id="feedback" aria-live="polite">👆 TOCA EN LA IMAGEN</p>
+          <span id="gameCount" class="badge"></span>
+        </div>
+
+        <!-- Finalización -->
+        <div id="finish" hidden>
+          <div class="finish-stars" aria-hidden="true">★ ✦ ★</div>
+          <h1>¡EXCELENTE TRABAJO!</h1>
+          <p>¡Conoces las partes de la mano y las texturas!</p>
+          <div class="actions">
+            <button id="again" class="primary">↻ VOLVER A JUGAR</button>
+            <button id="dictionary" class="secondary">REGRESAR AL DICCIONARIO</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <nav id="controls" class="footer" aria-label="Controles del diccionario" hidden>
+      <button id="home">⌂ INICIO</button>
+      <button id="prev">← ANTERIOR</button>
+      <button id="repeat" class="secondary">🔊 REPETIR</button>
+      <button id="next" class="primary">SIGUIENTE →</button>
+    </nav>
+
+  </section>
+
+  <p id="status" class="status" role="status"></p>
+  <noscript>ACTIVA JAVASCRIPT PARA JUGAR.</noscript>
+
+</main>
+
+<script src="./js/main.js"></script>
+</body>
+</html>
