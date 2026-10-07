@@ -6,10 +6,13 @@
  * el contorno resaltado de la parte (coordenadas del video).
  *
  *   MANO   0.0 – 2.5 s   acercamiento a la mano abierta
- *   DEDOS  2.6 – 4.6 s   acercamiento a los dedos y el pulgar
- *   PALMA  4.0 – 4.6 s   palma abierta (mismo cuadro final que DEDOS)
- *   SUAVE  5.5 – 7.2 s   la mano acaricia el peluche
- *   ÁSPERO 7.7 – 9.9 s   la mano frota la lija
+ *   DEDOS  2.5 – 4.6 s   acercamiento a los dedos y el pulgar
+ *   PALMA  4.6 – 5.0 s   palma abierta
+ *   SUAVE  5.0 – 7.2 s   la mano acaricia el peluche
+ *   ÁSPERO 7.2 – 9.9 s   la mano frota la lija
+ *
+ * Los tramos son CONSECUTIVOS: al pasar a la siguiente parte el video sigue
+ * desde donde se pausó (sin cortes, sin fundidos, sin pantalla en negro).
  *
  * JUEGO → una sola imagen (assets/images/mano.jpg) con zonas SVG tocables.
  *
@@ -57,28 +60,28 @@ const PARTS_DATA = [
     phrase:   'Estos son mis dedos. Mis dedos se pueden mover.',
     question: '¿Dónde están los dedos?',
     answer:   '¡Muy bien! Estos son los dedos.',
-    clip: { start: 2.60, end: 4.60 }, shape: 'dedos', gameZone: 'dedos',
+    clip: { start: 2.50, end: 4.60 }, shape: 'dedos', gameZone: 'dedos',
   },
   {
     id: 'palma', label: 'PALMA', icon: '🤚',
     phrase:   'Esta es la palma de mi mano.',
     question: '¿Dónde está la palma?',
     answer:   '¡Muy bien! Esta es la palma.',
-    clip: { start: 4.00, end: 4.60 }, shape: 'palma', gameZone: 'palma',
+    clip: { start: 4.60, end: 5.00 }, shape: 'palma', gameZone: 'palma',
   },
   {
     id: 'suave', label: 'SUAVE', icon: '🧸',
     phrase:   'El algodón se siente suave.',
     question: '¿Cuál es el objeto suave?',
     answer:   '¡Muy bien! El peluche es suave.',
-    clip: { start: 5.50, end: 7.20 }, shape: 'peluche', gameZone: 'suave',
+    clip: { start: 5.00, end: 7.20 }, shape: 'peluche', gameZone: 'suave',
   },
   {
     id: 'aspero', label: 'ÁSPERO', icon: '🟫',
     phrase:   'El cartón se siente áspero.',
     question: '¿Cuál es el objeto áspero?',
     answer:   '¡Muy bien! La lija es áspera.',
-    clip: { start: 7.70, end: 9.90 }, shape: 'lija', gameZone: 'aspero',
+    clip: { start: 7.20, end: 9.90 }, shape: 'lija', gameZone: 'aspero',
   },
 ];
 
@@ -345,7 +348,12 @@ class SceneImageController {
     this._lesson = lessonEl;
     this._shape  = lessonEl.querySelector('#lessonShape');
     this._videoOk = true;
-    videoEl.addEventListener('error', () => { this._videoOk = false; });
+    // Si el video no carga, se usa la imagen del juego como respaldo
+    videoEl.addEventListener('error', () => {
+      this._videoOk = false;
+      videoEl.hidden = true;
+      imgEl.hidden = false;
+    });
   }
 
   /** Los elementos SVG no tienen .hidden → se usa el atributo. */
@@ -373,8 +381,9 @@ class SceneImageController {
   }
 
   /**
-   * Reproduce el tramo [start, end] del video y lo pausa en `end`.
-   * Al pausar muestra el contorno de la parte.
+   * Reproduce el tramo [start, end] y lo pausa en `end`, mostrando el contorno.
+   * Si el video ya está pausado dentro/al inicio del tramo (navegación hacia
+   * adelante), SIGUE desde ahí: sin saltos, sin fundidos.
    * @param {{start:number,end:number}} clip
    * @param {string|null} shapeKey  clave de SHAPES
    * @param {() => boolean} isStale  true si la escena ya no está vigente
@@ -383,37 +392,27 @@ class SceneImageController {
     const v = this._video;
     this._setHidden(this._svg, true);
     this._setHidden(this._lesson, true);
+    if (!this._videoOk) return;
 
-    // Fade out → cambiar a video
-    this._img.classList.add('fading');
-    v.classList.add('fading');
-    await sleep(250);
-    if (isStale()) return;
-
-    if (!this._videoOk) {            // sin video: se queda la imagen del juego
-      this._img.classList.remove('fading');
-      return;
+    const t = v.currentTime;
+    const continuous = !v.hidden && t >= clip.start - 0.08 && t < clip.end - 0.05;
+    if (!continuous) {
+      await this._seek(clip.start, true);   // salto instantáneo (solo al repetir / retroceder)
+      if (isStale()) return;
     }
-    v.pause();
     this._img.hidden = true;
     v.hidden = false;
-    await this._seek(clip.start);
-    if (isStale()) return;
-    v.classList.remove('fading');
 
-    try { await v.play(); } catch (e) { /* autoplay bloqueado: se queda en el primer cuadro */ }
+    try { await v.play(); } catch (e) { /* autoplay bloqueado */ }
 
-    // Esperar hasta el final del tramo
     while (!isStale() && !v.paused && !v.ended && v.currentTime < clip.end) {
       await sleep(30);
     }
     if (isStale()) return;
     v.pause();
-    // Fijar el cuadro EXACTO del final (el cuadro mostrado puede ir 1-2 cuadros atrasado)
-    await this._seek(clip.end, true);
+    await this._seek(clip.end, true);       // cuadro EXACTO del final
     if (isStale()) return;
 
-    // Contorno de la parte sobre el cuadro pausado
     if (shapeKey && SHAPES[shapeKey]) {
       this._lesson.setAttribute('viewBox', `0 0 ${VIDEO_W} ${VIDEO_H}`);
       this._shape.setAttribute('d', SHAPES[shapeKey]);
@@ -421,31 +420,34 @@ class SceneImageController {
     }
   }
 
-  /** Muestra la imagen única del juego y activa el SVG de zonas. */
+  /** Cambia a la imagen única del juego (instantáneo) y activa el SVG de zonas. */
   async showGameScene() {
     this._video.pause();
     this._setHidden(this._svg, true);
     this._setHidden(this._lesson, true);
-    this._img.classList.add('fading');
-    await sleep(250);
-    this._video.hidden = true;
-    this._img.hidden   = false;
     if (!this._img.src.endsWith(GAME_IMAGE_SRC.replace('./', ''))) this._img.src = GAME_IMAGE_SRC;
     await new Promise((resolve) => {
       if (this._img.complete && this._img.naturalWidth > 0) { resolve(); return; }
       this._img.onload = resolve; this._img.onerror = resolve;
     });
-    this._img.classList.remove('fading');
+    this._img.hidden   = false;
+    this._video.hidden = true;
     this._setHidden(this._svg, false);
   }
 
-  /** Vuelve a la imagen (inicio) y oculta los contornos. */
+  /** Pantalla de inicio: primer cuadro del video (o la imagen si no hay video). */
   showHome() {
+    this._setHidden(this._svg, true);
+    this._setHidden(this._lesson, true);
     this._video.pause();
-    this._video.hidden = true;
-    this._img.hidden   = false;
-    this._img.classList.remove('fading');
-    this.hideSvg();
+    if (this._videoOk) {
+      this._img.hidden   = true;
+      this._video.hidden = false;
+      this._seek(0, true);
+    } else {
+      this._video.hidden = true;
+      this._img.hidden   = false;
+    }
   }
 
   /** Oculta los SVG superpuestos. */
@@ -541,7 +543,6 @@ class LessonMode {
 
     // Intro solo en la primera escena
     if (intro) await this._audio.playIntro();
-    else       await sleep(300);
     if (token !== this._state.epoch) return;
 
     await this._play(i, token);
@@ -740,6 +741,7 @@ class App {
       if (this.state.mode === 'lesson') this.lesson.repeat();
       else if (this.state.mode === 'game') this.game.repeatQuestion();
     };
+    this.scene.showHome();
     $('home').onclick     = () => {
       this.state.newEpoch();
       this.audio.stopAll();
