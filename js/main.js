@@ -1,19 +1,19 @@
 /**
  * @fileoverview Diccionario Digital Interactivo de la Mano
  *
- * LECCIÓN (5 escenas) → usa tramos del video assets/video/manooos.mp4.
+ * LECCIÓN (5 escenas) → usa tramos del video assets/video/manos.mp4 (1280 x 720, 10 s).
  * Cada tramo se reproduce y se PAUSA en el fotograma final; ahí aparece
- * el contorno resaltado de la parte (coordenadas del video: 864 x 496).
+ * el contorno resaltado de la parte (coordenadas del video).
  *
- *   MANO   0.00 – 0.62 s  plano general
- *   DEDOS  2.30 – 2.80 s  palma abierta (dedos + pulgar)
- *   PALMA  2.55 – 2.80 s  palma abierta (centro de la mano)
- *   SUAVE  2.92 – 4.05 s  mano sobre el peluche
- *   ÁSPERO 0.70 – 1.75 s  dedos sobre la lija
+ *   MANO   0.0 – 2.5 s   acercamiento a la mano abierta
+ *   DEDOS  2.6 – 4.6 s   acercamiento a los dedos y el pulgar
+ *   PALMA  4.0 – 4.6 s   palma abierta (mismo cuadro final que DEDOS)
+ *   SUAVE  5.5 – 7.2 s   la mano acaricia el peluche
+ *   ÁSPERO 7.7 – 9.9 s   la mano frota la lija
  *
  * JUEGO → una sola imagen (assets/images/mano.jpg) con zonas SVG tocables.
  *
- * @version 3.0.0
+ * @version 3.1.0
  */
 
 'use strict';
@@ -25,16 +25,16 @@
 const AUDIO_BASE = './assets/audios/';
 
 /** Tamaño del video (sistema de coordenadas de los contornos). */
-const VIDEO_W = 864, VIDEO_H = 496;
+const VIDEO_W = 1280, VIDEO_H = 720;
 
 /** Contornos (path SVG) en coordenadas del video. */
 const SHAPES = {
-  manoAbierta: 'M392 318 L430 270 L500 272 L535 300 L562 322 L558 332 L525 322 L555 350 L598 405 L595 415 L578 450 L552 466 L520 440 L490 440 L470 440 L445 415 L425 380 L400 345 Z',
-  dedos:       'M525 205 L600 225 L700 240 L765 270 L770 295 L740 303 L755 320 L750 345 L700 360 L690 375 L670 395 L600 400 L570 420 L535 430 L450 437 L390 420 L380 385 L420 360 L470 325 L505 285 Z ' +
-               'M330 62 L420 48 L520 45 L600 52 L605 75 L580 100 L520 122 L445 130 L400 110 L360 85 Z',
-  palma:       'M150 200 L210 110 L300 75 L390 100 L440 145 L505 180 L525 215 L505 285 L470 325 L420 360 L380 385 L300 375 L210 320 L150 265 Z',
-  peluche:     'M105 360 L150 300 L340 285 L380 140 L500 118 L555 50 L640 100 L700 85 L790 65 L864 95 L864 496 L130 496 L105 420 Z',
-  lija:        'M283 345 L558 198 L795 437 L398 492 Z',
+  mano:    'M590 418 L640 400 L720 398 L790 410 L925 425 L925 455 L880 468 L790 465 L800 480 L860 520 L1000 580 L1025 600 L1020 625 L940 655 L945 685 L900 690 L835 692 L790 675 L700 650 L620 610 L560 555 L550 500 Z',
+  dedos:   'M800 345 L900 372 L1010 415 L1100 445 L1113 470 L1090 495 L1020 500 L1090 525 L1100 555 L1070 583 L1005 580 L1000 625 L985 650 L940 662 L880 650 L850 640 L815 645 L808 665 L770 672 L700 655 L640 615 L580 580 L640 555 L700 520 L740 480 L800 420 Z ' +
+           'M610 140 L700 130 L800 128 L880 130 L912 150 L912 180 L880 205 L800 222 L710 235 L680 235 L650 190 Z',
+  palma:   'M330 230 L430 180 L560 150 L640 140 L660 200 L690 240 L730 300 L800 345 L800 420 L740 480 L700 520 L640 555 L580 580 L500 560 L400 505 L330 460 L300 400 L300 290 Z',
+  peluche: 'M480 470 L520 440 L640 425 L770 425 L840 330 L900 300 L850 190 L920 150 L1040 110 L1100 75 L1160 100 L1200 190 L1280 260 L1280 470 L1250 590 L1220 660 L1100 700 L900 720 L740 700 L600 660 L520 620 L490 560 Z',
+  lija:    'M660 318 L735 365 L805 430 L808 470 L805 515 L780 548 L700 578 L600 560 L495 520 L745 700 L1035 540 Z',
 };
 
 /**
@@ -50,35 +50,35 @@ const PARTS_DATA = [
     phrase:   'Esta es mi mano. Con mi mano puedo tocar y saludar.',
     question: '¿Dónde está la mano?',
     answer:   '¡Muy bien! Esta es la mano.',
-    clip: { start: 0.00, end: 0.62 }, shape: 'manoAbierta', gameZone: 'mano',
+    clip: { start: 0.00, end: 2.50 }, shape: 'mano', gameZone: 'mano',
   },
   {
     id: 'dedos', label: 'DEDOS', icon: '🖐️',
     phrase:   'Estos son mis dedos. Mis dedos se pueden mover.',
     question: '¿Dónde están los dedos?',
     answer:   '¡Muy bien! Estos son los dedos.',
-    clip: { start: 2.30, end: 2.80 }, shape: 'dedos', gameZone: 'dedos',
+    clip: { start: 2.60, end: 4.60 }, shape: 'dedos', gameZone: 'dedos',
   },
   {
     id: 'palma', label: 'PALMA', icon: '🤚',
     phrase:   'Esta es la palma de mi mano.',
     question: '¿Dónde está la palma?',
     answer:   '¡Muy bien! Esta es la palma.',
-    clip: { start: 2.55, end: 2.80 }, shape: 'palma', gameZone: 'palma',
+    clip: { start: 4.00, end: 4.60 }, shape: 'palma', gameZone: 'palma',
   },
   {
     id: 'suave', label: 'SUAVE', icon: '🧸',
     phrase:   'El algodón se siente suave.',
     question: '¿Cuál es el objeto suave?',
     answer:   '¡Muy bien! El peluche es suave.',
-    clip: { start: 2.92, end: 4.05 }, shape: 'peluche', gameZone: 'suave',
+    clip: { start: 5.50, end: 7.20 }, shape: 'peluche', gameZone: 'suave',
   },
   {
     id: 'aspero', label: 'ÁSPERO', icon: '🟫',
     phrase:   'El cartón se siente áspero.',
     question: '¿Cuál es el objeto áspero?',
     answer:   '¡Muy bien! La lija es áspera.',
-    clip: { start: 0.70, end: 1.75 }, shape: 'lija', gameZone: 'aspero',
+    clip: { start: 7.70, end: 9.90 }, shape: 'lija', gameZone: 'aspero',
   },
 ];
 
