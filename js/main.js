@@ -417,7 +417,23 @@ class SceneImageController {
       this._lesson.setAttribute('viewBox', `0 0 ${VIDEO_W} ${VIDEO_H}`);
       this._shape.setAttribute('d', SHAPES[shapeKey]);
       this._setHidden(this._lesson, false);
+      this._sparkle();
     }
+  }
+
+  /** Pequeños destellos alrededor del contorno resaltado. */
+  _sparkle() {
+    const g = this._lesson.querySelector('#lessonSparks');
+    const bb = this._shape.getBBox();
+    const star = (cx, cy, r) =>
+      `M${cx} ${cy - r} Q${cx} ${cy} ${cx + r} ${cy} Q${cx} ${cy} ${cx} ${cy + r} Q${cx} ${cy} ${cx - r} ${cy} Q${cx} ${cy} ${cx} ${cy - r}Z`;
+    const pts = [
+      [bb.x + bb.width + 26, bb.y + bb.height * 0.25, 22],
+      [bb.x + bb.width + 8,  bb.y + bb.height * 0.78, 30],
+      [bb.x + bb.width * 0.35, bb.y + bb.height + 24, 18],
+    ];
+    g.innerHTML = pts.map(([x, y, r], n) =>
+      `<path class="spark" style="animation-delay:${n * 0.4}s" d="${star(x, y, r)}"/>`).join('');
   }
 
   /** Cambia a la imagen única del juego (instantáneo) y activa el SVG de zonas. */
@@ -454,6 +470,8 @@ class SceneImageController {
   hideSvg() {
     this._setHidden(this._svg, true);
     this._setHidden(this._lesson, true);
+    const g = this._lesson.querySelector('#lessonSparks');
+    if (g) g.innerHTML = '';
   }
 }
 
@@ -736,6 +754,10 @@ class App {
     $('next').onclick     = () => {
       if (this.state.mode === 'lesson') { if (this.lesson.next()) this.game.start(); }
     };
+    $('listen').onclick   = () => {
+      this.audio.unlock();
+      if (this.state.mode === 'lesson') this.lesson.repeat();
+    };
     $('repeat').onclick   = () => {
       this.audio.unlock();
       if (this.state.mode === 'lesson') this.lesson.repeat();
@@ -756,7 +778,6 @@ class App {
 
     $('sound').onclick = () => {
       const muted = this.audio.toggleMute();
-      $('sound').textContent = muted ? '🔇' : '🔊';
       $('sound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Desactivar sonido');
       $('sound').setAttribute('aria-pressed', String(!muted));
       if (!muted) {

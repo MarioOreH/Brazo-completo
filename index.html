@@ -13,12 +13,40 @@
 </head>
 <body>
 
+<!-- Iconos reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gSpk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5cc8ff"/><stop offset="1" stop-color="#2f7de1"/>
+    </linearGradient>
+    <symbol id="i-speaker" viewBox="0 0 48 48">
+      <path d="M6 18h8l11-9v30l-11-9H6z" fill="currentColor"/>
+      <path d="M32 17c3.2 3.8 3.2 10.2 0 14M37.5 11.5c6 6.2 6 18.8 0 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-speaker-off" viewBox="0 0 48 48">
+      <path d="M6 18h8l11-9v30l-11-9H6z" fill="currentColor"/>
+      <path d="M33 18l10 12M43 18L33 30" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-house" viewBox="0 0 48 48">
+      <path d="M6 24L24 7l18 17" fill="none" stroke="#ff6b6b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M11 22v18h26V22L24 11z" fill="#ffd36b"/>
+      <rect x="20" y="28" width="9" height="12" rx="2" fill="#6c4bd1"/>
+    </symbol>
+  </defs>
+</svg>
+
 <main class="app">
 
   <!-- ====== Encabezado ====== -->
   <header>
-    <span class="brand">MI PEQUEÑO MUNDO · LA MANO</span>
-    <button id="sound" class="sound" aria-label="Desactivar sonido" aria-pressed="true">🔊</button>
+    <h1 class="brand">
+      <span class="c-pink">MI</span> <span class="c-yellow">PEQUEÑO</span> <span class="c-teal">MUNDO</span>
+      <span class="c-dot">•</span> <span class="c-purple">LA MANO</span>
+    </h1>
+    <button id="sound" class="sound" aria-label="Desactivar sonido" aria-pressed="true">
+      <svg class="ico ico-on"  aria-hidden="true"><use href="#i-speaker"/></svg>
+      <svg class="ico ico-off" aria-hidden="true"><use href="#i-speaker-off"/></svg>
+    </button>
   </header>
 
   <!-- ====== Tarjeta principal ====== -->
@@ -50,6 +78,7 @@
         <svg id="lessonSvg" class="scene-svg" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet"
              aria-hidden="true" hidden>
           <path id="lessonShape" class="lesson-shape" d=""/>
+          <g id="lessonSparks" class="sparks"></g>
         </svg>
 
         <svg id="sceneSvg" class="scene-svg" viewBox="0 0 1024 1000" preserveAspectRatio="xMidYMid meet"
@@ -96,7 +125,7 @@
 
         <!-- Bienvenida -->
         <div id="welcome">
-          <span class="badge">MIRAMOS · ESCUCHAMOS · JUGAMOS</span>
+          <span class="badge"><span class="c-pink">MIRAMOS</span> • <span class="c-yellow">ESCUCHAMOS</span> • <span class="c-teal">JUGAMOS</span></span>
           <h1>MI DICCIONARIO<br>DE LA MANO</h1>
           <p>Descubrimos las partes de nuestra mano y las texturas</p>
           <div class="actions">
@@ -106,18 +135,20 @@
 
         <!-- Lección -->
         <div id="lesson" hidden>
-          <span class="eyebrow">CONOZCO MI MANO</span>
+          <span class="eyebrow"><span class="c-pink">CONOZCO</span> <span class="c-yellow">MI</span> <span class="c-teal">MANO</span></span>
           <h2 id="word">MI MANO</h2>
           <p id="phrase"></p>
           <div id="lessonIcon" class="lesson-icon" hidden></div>
-          <p class="hint">👆 TOCA Y ESCUCHA</p>
+          <button id="listen" class="listen" type="button">
+            ¡TOCA Y ESCUCHA! <svg class="ico" aria-hidden="true"><use href="#i-speaker"/></svg>
+          </button>
           <div id="dots" class="progress" aria-hidden="true"></div>
           <span id="count" class="badge"></span>
         </div>
 
         <!-- Juego -->
         <div id="game" hidden>
-          <span class="eyebrow">JUGAMOS JUNTOS</span>
+          <span class="eyebrow"><span class="c-pink">JUGAMOS</span> <span class="c-teal">JUNTOS</span></span>
           <h2>¿DÓNDE ESTÁ?</h2>
           <p id="question"></p>
           <p id="feedback" aria-live="polite">👆 TOCA EN LA IMAGEN</p>
@@ -138,15 +169,16 @@
       </div>
     </div>
 
-    <!-- Controles -->
-    <nav id="controls" class="footer" aria-label="Controles del diccionario" hidden>
-      <button id="home">⌂ INICIO</button>
-      <button id="prev">← ANTERIOR</button>
-      <button id="repeat" class="secondary">🔊 REPETIR</button>
-      <button id="next" class="primary">SIGUIENTE →</button>
-    </nav>
 
   </section>
+
+  <!-- ====== Controles (debajo de la tarjeta) ====== -->
+  <nav id="controls" class="footer" aria-label="Controles del diccionario" hidden>
+    <button id="home" class="btn-home"><svg class="ico" aria-hidden="true"><use href="#i-house"/></svg> INICIO</button>
+    <button id="prev" class="btn-prev">← ANTERIOR</button>
+    <button id="repeat" class="btn-repeat"><svg class="ico" aria-hidden="true"><use href="#i-speaker"/></svg> REPETIR</button>
+    <button id="next" class="primary btn-next">SIGUIENTE →</button>
+  </nav>
 
   <p id="status" class="status" role="status"></p>
   <noscript>ACTIVA JAVASCRIPT PARA JUGAR.</noscript>
